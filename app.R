@@ -6,6 +6,9 @@
 #
 #    https://shiny.posit.co/
 #
+install.packages("gitcreds")
+library(gitcreds)
+gitcreds::gitcreds_set()
 
 library(shiny)
 

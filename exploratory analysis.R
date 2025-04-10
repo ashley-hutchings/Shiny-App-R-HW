@@ -28,7 +28,7 @@ ggplot(alz, aes(x = factor(Diagnosis))) +
 
 
 
-# Bin DietQuality if you haven't already
+# Bin DietQuality 
 alz$DietQualityBin <- cut(alz$DietQuality,
                                breaks = quantile(alz$DietQuality, probs = seq(0, 1, 0.2), na.rm = TRUE),
                                include.lowest = TRUE,
@@ -43,7 +43,7 @@ ggplot(alz, aes(x = DietQualityBin, fill = factor(Diagnosis))) +
        fill = "Diagnosis") +
   theme_minimal()
 
-# Bin SleepQuality if you haven't already
+# Bin SleepQuality
 alz$SleepQualityBin <- cut(alz$SleepQuality,
                           breaks = quantile(alz$SleepQuality, probs = seq(0, 1, 0.2), na.rm = TRUE),
                           include.lowest = TRUE,

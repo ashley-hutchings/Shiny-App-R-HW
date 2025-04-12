@@ -1,54 +1,74 @@
-#
+
 # This is a Shiny web application. You can run the application by clicking
 # the 'Run App' button above.
 #
 # Find out more about building applications with Shiny here:
 #
 #    https://shiny.posit.co/
-#
-install.packages("gitcreds")
-library(gitcreds)
-gitcreds::gitcreds_set()
+
 
 library(shiny)
+library(tidyverse)
+library(DT)
+install.packages('rsconnect')
+library(rsconnect)
 
-# Define UI for application that draws a histogram
+#rsconnect::setAccountInfo(name='ashleyshineyio', token='E563736F7FDF216E79F883E0E6B7D9AF', secret='6lW/a/LLZQSoi5i3l368fIj19VOTKchP4FR8gUu0')
+
+#Load dataset
+alz <- read.csv("alzheimers_disease_data.csv")
+
+# Define UI
 ui <- fluidPage(
-
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
-
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-           plotOutput("distPlot")
-        )
+  titlePanel("Alzheimer's Diagnosis Explorer"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("binVar", "Choose a variable to bin:",
+                  choices = c("DietQuality", "SleepQuality"),
+                  selected = "DietQuality")
+    ),
+    
+    mainPanel(
+      plotOutput("barPlot"),
+      DTOutput("summaryTable")
     )
+  )
 )
 
-# Define server logic required to draw a histogram
+# Define server
 server <- function(input, output) {
-
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white',
-             xlab = 'Waiting time to next eruption (in mins)',
-             main = 'Histogram of waiting times')
-    })
+  
+  # Create binned version of selected variable
+  binned_data <- reactive({
+    bin_var <- alz[[input$binVar]]
+    bins <- cut(bin_var,
+                breaks = quantile(bin_var, probs = seq(0, 1, 0.2), na.rm = TRUE),
+                include.lowest = TRUE,
+                labels = c("Very Low", "Low", "Medium", "High", "Very High"))
+    
+    df <- alz
+    df$BinnedVar <- bins
+    df
+  })
+  
+  # Create bar plot
+  output$barPlot <- renderPlot({
+    ggplot(binned_data(), aes(x = BinnedVar, fill = factor(Diagnosis))) +
+      geom_bar(position = "dodge") +
+      labs(title = paste("Diagnosis Count by", input$binVar),
+           x = paste(input$binVar, "(Binned)"),
+           fill = "Diagnosis") +
+      theme_minimal()
+  })
+  
+  # Create summary table
+  output$summaryTable <- renderDT({
+    binned_data() %>%
+      group_by(BinnedVar, Diagnosis) %>%
+      summarize(Count = n(), .groups = "drop") %>%
+      datatable()
+  })
 }
-
-# Run the application 
+# Run  app
 shinyApp(ui = ui, server = server)

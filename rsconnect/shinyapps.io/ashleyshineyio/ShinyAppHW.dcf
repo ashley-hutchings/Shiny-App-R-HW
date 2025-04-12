@@ -1,0 +1,12 @@
+name: ShinyAppHW
+title: ShinyAppHW
+username: ashleyshineyio
+account: ashleyshineyio
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14508524
+bundleId: 10105145
+url: https://ashleyshineyio.shinyapps.io/ShinyAppHW/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

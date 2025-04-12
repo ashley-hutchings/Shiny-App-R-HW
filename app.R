@@ -10,6 +10,10 @@
 library(shiny)
 library(tidyverse)
 library(DT)
+install.packages('rsconnect')
+library(rsconnect)
+
+#rsconnect::setAccountInfo(name='ashleyshineyio', token='E563736F7FDF216E79F883E0E6B7D9AF', secret='6lW/a/LLZQSoi5i3l368fIj19VOTKchP4FR8gUu0')
 
 #Load dataset
 alz <- read.csv("alzheimers_disease_data.csv")

@@ -35,7 +35,7 @@ ui <- fluidPage(
 # Define server
 server <- function(input, output) {
   
-  # Create binned version of selected variable
+# Create binned version of selected variable
   binned_data <- reactive({
     bin_var <- alz[[input$binVar]]
     bins <- cut(bin_var,
@@ -48,7 +48,7 @@ server <- function(input, output) {
     df
   })
   
-  # Create bar plot
+# Create bar plot
   output$barPlot <- renderPlot({
     ggplot(binned_data(), aes(x = BinnedVar, fill = factor(Diagnosis))) +
       geom_bar(position = "dodge") +
@@ -58,7 +58,7 @@ server <- function(input, output) {
       theme_minimal()
   })
   
-  # Create summary table
+# Create summary table
   output$summaryTable <- renderDT({
     binned_data() %>%
       group_by(BinnedVar, Diagnosis) %>%

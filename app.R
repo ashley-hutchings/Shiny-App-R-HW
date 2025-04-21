@@ -8,17 +8,13 @@ alz <- read.csv("alzheimers_disease_data.csv")
 
 # Define UI
 ui <- fluidPage(
-  theme = bs_theme(base_font = font_google("Inter"), bootswatch = "darkly"),
-  
+  theme = bs_theme(bootswatch = "darkly"),
   tags$head(
     tags$style(HTML("
       body {
         background-color: #1e1e1e !important;
         color: #f5f5f5;
       }
-      
-      
-
       .well {
         background-color: #121212 !important;
         border: none;
@@ -110,19 +106,17 @@ ui <- fluidPage(
   
   sidebarLayout(
     sidebarPanel(
-      selectInput(
-        inputId = "binVar",
-        label = "Choose a variable to bin:",
-        choices = c("DietQuality", "SleepQuality"),
-        selected = "DietQuality"
-      ),
+      selectInput("var", "Choose a variable:", choices = names(alz)),
+      uiOutput("chartTypeUI"),
+      checkboxInput("facet", "Facet by Diagnosis", value = FALSE)
+      ,
       width = 3
     ),
     
     mainPanel(
       div(class = "main-panel",
           div(class = "shiny-plot-output",
-              plotOutput("barPlot")
+              plotOutput("mainPlot")
           ),
           downloadButton("downloadData", "Download CSV", class = "btn-primary"),
           br(), br(),
@@ -135,64 +129,67 @@ ui <- fluidPage(
 
 # Define server logic
 server <- function(input, output) {
-  
-  binned_data <- reactive({
-    bin_var <- alz[[input$binVar]]
-    bins <- cut(
-      bin_var,
-      breaks = quantile(bin_var, probs = seq(0, 1, 0.2), na.rm = TRUE),
-      include.lowest = TRUE,
-      labels = c("Very Low", "Low", "Medium", "High", "Very High")
-    )
+  output$chartTypeUI <- renderUI({
+    req(input$var)
+    var <- alz[[input$var]]
     
-    df <- alz
-    df$BinnedVar <- bins
-    df
+    if (is.numeric(var)) {
+      selectInput("chart", "Chart Type:", choices = c("Bar Chart", "Boxplot", "Density Plot"))
+    } else if (is.factor(var) || is.character(var)) {
+      selectInput("chart", "Chart Type:", choices = c("Bar Plot", "Pie Chart"))
+    } else {
+      selectInput("chart", "Chart Type:", choices = c("Unsupported"))
+    }
   })
-  
-  output$barPlot <- renderPlot({
-    ggplot(binned_data(), aes(x = BinnedVar, fill = factor(Diagnosis))) +
-      geom_bar(
-        position = "dodge",
-        color = "#121212",
-        size = 0.3,
-        alpha = 0.85
-      ) +
-      scale_fill_manual(values = c("0" = "#00ffd0", "1" = "#e91e63")) +
-      labs(
-        title = paste("Diagnosis Count by", input$binVar),
-        x = paste(input$binVar, "(Binned)"),
-        fill = "Diagnosis"
-      ) +
-      theme_minimal(base_family = "Inter") +
-      theme(
-        plot.title = element_text(size = 16, face = "bold", color = "#f5f5f5"),
-        axis.title = element_text(size = 14, color = "#f5f5f5"),
-        axis.text = element_text(size = 12, color = "#cccccc"),
-        legend.title = element_text(size = 13, color = "#f5f5f5"),
-        legend.text = element_text(size = 11, color = "#cccccc"),
-        panel.background = element_rect(fill = "#1e1e1e", color = NA),
-        plot.background = element_rect(fill = "#1e1e1e", color = NA),
-        panel.grid.major = element_line(color = "#333333"),
-        panel.grid.minor = element_blank()
-      )
-  })
-  
-  summary_data <- reactive({
-    binned_data() %>%
-      group_by(BinnedVar, Diagnosis) %>%
-      summarize(Count = n(), .groups = "drop")
+  output$mainPlot <- renderPlot({
+    req(input$var, input$chart)
+    var <- alz[[input$var]]
+    
+    if (input$chart == "Bar Chart") {
+      p <- ggplot(alz, aes_string(x = input$var)) +
+        geom_histogram(fill = "#00ffd0", bins = 30, alpha = 0.85, color = "#121212") +
+        labs(title = paste("Bar Chart of", input$var), x = input$var, y = "Count")
+      
+      if (input$facet) {
+        p <- p + facet_wrap(~ Diagnosis)
+      }
+      p
+      
+    } else if (input$chart == "Boxplot") {
+      p <- ggplot(alz, aes_string(x = if (input$facet) "factor(Diagnosis)" else NULL, y = input$var)) +
+        geom_boxplot(fill = "#e91e63", alpha = 0.7, color = "#121212") +
+        labs(
+          title = paste("Boxplot of", input$var),
+          x = if (input$facet) "Diagnosis" else "",
+          y = input$var
+        )
+      p
+      
+    } else if (input$chart == "Density Plot") {
+      p <- ggplot(alz, aes_string(x = input$var, fill = if (input$facet) "factor(Diagnosis)" else NULL)) +
+        geom_density(alpha = 0.6) +
+        labs(title = paste("Density of", input$var), x = input$var)
+      
+      if (input$facet) {
+        p <- p + facet_wrap(~ Diagnosis)
+      }
+      p
+    }
   })
   
   output$summaryTable <- renderDT({
+    summary_data <- alz %>%
+      group_by(.data[[input$var]], Diagnosis) %>%
+      summarize(Count = n(), .groups = "drop")
+    
     datatable(
-      summary_data(),
+      summary_data,
       options = list(
         pageLength = 10,
         autoWidth = TRUE,
         scrollX = TRUE,
-        scrollY = "400px",  # ← THIS prevents extra space
-        dom = 'ftip',       # omit buttons to simplify layout
+        scrollY = "400px",
+        dom = 'ftip',
         ordering = TRUE
       ),
       filter = "top",
@@ -201,10 +198,6 @@ server <- function(input, output) {
       style = "bootstrap"
     )
   })
-  
-  
-  
-  
   # output$summaryTable <- renderDT({
   #   datatable(
   #     binned_data() %>%
@@ -234,13 +227,11 @@ server <- function(input, output) {
       paste("alzheimers_summary_", Sys.Date(), ".csv", sep = "")
     },
     content = function(file) {
-      write.csv(
-        binned_data() %>%
-          group_by(BinnedVar, Diagnosis) %>%
-          summarize(Count = n(), .groups = "drop"),
-        file,
-        row.names = FALSE
-      )
+      summary_data <- alz %>%
+        group_by(.data[[input$var]]) %>%
+        summarize(Count = n(), .groups = "drop")
+      write.csv(summary_data, file, row.names = FALSE)
+      
     }
   )
 }

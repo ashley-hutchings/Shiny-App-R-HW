@@ -6,6 +6,10 @@ library(bslib)
 # Load dataset
 alz <- read.csv("alzheimers_disease_data.csv")
 
+alz$Gender <- factor(alz$Gender, levels = c(0, 1), labels = c("Male", "Female"))
+#alz$Diagnosis <- factor(alz$Diagnosis, levels = c(1, 2, 3), labels = c("CN", "MCI", "AD"))
+
+
 # Define UI
 ui <- fluidPage(
   theme = bs_theme(bootswatch = "darkly"),
@@ -104,6 +108,21 @@ ui <- fluidPage(
   
   titlePanel("Alzheimer's Diagnosis Explorer"),
   
+  fluidRow(
+    column(
+      width = 12,
+      wellPanel(
+        HTML("<h4>About Alzheimer's Disease</h4>
+          <p>Alzheimer’s disease is a progressive neurological disorder that causes memory loss, cognitive decline, and personality changes. 
+          It is the most common form of dementia, affecting millions of individuals and their families worldwide. Though research continues, there is currently no cure for Alzheimer's.</p>
+          <h5>How to Use This App</h5>
+          <p>Select a variable from the dropdown menu to explore how it relates to Alzheimer's diagnoses. 
+          Choose a chart type based on the data, and optionally facet the results by diagnosis category. 
+          You can also download a summary table of the data below the chart. Click <a href='https://www.kaggle.com/datasets/rabieelkharoua/alzheimers-disease-dataset' target='_blank'>here</a> to download the full dataset. </p>")
+      )
+    )
+  ),
+  
   sidebarLayout(
     sidebarPanel(
       selectInput("var", "Choose a variable:", choices = names(alz)),
@@ -134,20 +153,34 @@ server <- function(input, output) {
     var <- alz[[input$var]]
     
     if (is.numeric(var)) {
-      selectInput("chart", "Chart Type:", choices = c("Bar Chart", "Boxplot", "Density Plot"))
+      selectInput("chart", "Chart Type:", choices = c("Histogram", "Box Plot"))
     } else if (is.factor(var) || is.character(var)) {
-      selectInput("chart", "Chart Type:", choices = c("Bar Plot", "Pie Chart"))
+      selectInput("chart", "Chart Type:", choices = c("Bar Chart"))
     } else {
       selectInput("chart", "Chart Type:", choices = c("Unsupported"))
     }
   })
+  
+
   output$mainPlot <- renderPlot({
     req(input$var, input$chart)
     var <- alz[[input$var]]
     
-    if (input$chart == "Bar Chart") {
+    # Histogram for numeric
+    if (input$chart == "Histogram") {
       p <- ggplot(alz, aes_string(x = input$var)) +
         geom_histogram(fill = "#00ffd0", bins = 30, alpha = 0.85, color = "#121212") +
+        labs(title = paste("Histogram of", input$var), x = input$var, y = "Count")
+      
+      if (input$facet) {
+        p <- p + facet_wrap(~ Diagnosis)
+      }
+      p
+      
+      # Bar Chart for factor/character
+    } else if (input$chart == "Bar Chart") {
+      p <- ggplot(alz, aes_string(x = input$var)) +
+        geom_bar(fill = "#00ffd0", alpha = 0.85) +
         labs(title = paste("Bar Chart of", input$var), x = input$var, y = "Count")
       
       if (input$facet) {
@@ -155,32 +188,31 @@ server <- function(input, output) {
       }
       p
       
-    } else if (input$chart == "Boxplot") {
+      # Box Plot for numeric
+    } else if (input$chart == "Box Plot") {
       p <- ggplot(alz, aes_string(x = if (input$facet) "factor(Diagnosis)" else NULL, y = input$var)) +
         geom_boxplot(fill = "#e91e63", alpha = 0.7, color = "#121212") +
         labs(
-          title = paste("Boxplot of", input$var),
+          title = paste("Box Plot of", input$var),
           x = if (input$facet) "Diagnosis" else "",
           y = input$var
         )
       p
-      
-    } else if (input$chart == "Density Plot") {
-      p <- ggplot(alz, aes_string(x = input$var, fill = if (input$facet) "factor(Diagnosis)" else NULL)) +
-        geom_density(alpha = 0.6) +
-        labs(title = paste("Density of", input$var), x = input$var)
-      
-      if (input$facet) {
-        p <- p + facet_wrap(~ Diagnosis)
-      }
-      p
     }
   })
   
+  
+  
   output$summaryTable <- renderDT({
-    summary_data <- alz %>%
-      group_by(.data[[input$var]], Diagnosis) %>%
-      summarize(Count = n(), .groups = "drop")
+    if (input$facet) {
+      summary_data <- alz %>%
+        group_by(.data[[input$var]], Diagnosis) %>%
+        summarize(Count = n(), .groups = "drop")
+    } else {
+      summary_data <- alz %>%
+        group_by(.data[[input$var]]) %>%
+        summarize(Count = n(), .groups = "drop")
+    }
     
     datatable(
       summary_data,
@@ -198,6 +230,7 @@ server <- function(input, output) {
       style = "bootstrap"
     )
   })
+  
   # output$summaryTable <- renderDT({
   #   datatable(
   #     binned_data() %>%

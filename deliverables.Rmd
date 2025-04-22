@@ -7,20 +7,24 @@ output: pdf_document
 
 # 1. Concept and Purpose
 
-The goal of the Alzheimer's Data Explorer is an interactive Shiny application designed to help users explore patterns and potential risk factors related to Alzheimer's Disease. Its purpose is to make complex health data more accessible, especially for users without programming experience. By providing a visual, no-code interface, the app empowers users to investigate relationships between variables and Alzheimer's diagnosis using dynamic charts, summary statistics, and customizable data tables.  
+The goal of the Alzheimer's Data Explorer is an interactive Shiny application designed to help users explore patterns and potential risk factors related to Alzheimer's Disease. Its core purpose is to make complex health data more accessible, especially for users without programming experience. By providing a visual, no-code interface, the app empowers users to investigate relationships between variables and Alzheimer's diagnosis using dynamic charts, summary statistics, and customizable data tables.  
 
 # 2. Initial Plan and Motivation
 
-The motivation behind this app was to create a simple platform for visualizing the Alzheimer's dataset in a way that was intuitive and accessible for individuals without coding experience. The focus on Alzheimer’s disease seeks to shed light on the complexities of diagnosing it based on multiple contributing factors. See final page for design sketch. 
+The motivation behind this app was to create a simple platform for visualizing the Alzheimer's Disease dataset in a way that was intuitive and accessible for individuals without coding experience. The goals was to provide a tool for any user to interact with real-world Alzheimer's data and uncover patterns related to diagnosis. The focus on Alzheimer’s disease seeks to shed light on the complexities of diagnosing it based on multiple contributing factors. 
+(See final page for design sketch.) 
 
 # 3. Dataset and Relevance to the Course
 
 The dataset used is a publicly available Alzheimer’s Disease dataset from Kaggle. It contains 35 variables related to demographics, cognitive test scores, physical health measures, and behavioral symptoms. 
-The dataset provides real-world data with which to practice and apply techniques learned in this class such as data wrangling, visualizations and data summaries. The data contains both categorical and continuous variables, leveraging conditional logic. 
+The dataset provides real-world data with which to practice and apply techniques learned in this class such as data wrangling, visualizations and data summaries. The data contains both categorical and continuous variables, leveraging conditional logic. Moreover, this was an interesting, relevant but not overly complex dataset that was ideal for an initial project with R Shiny.
 
 # 4. Key Features and User Interaction
 ## Inputs
-Users can provide 3 inputs: variable selector, chart type, and an option to facet by Diagnosis. Once a variable is selected, the options provided for chart type will dynamically change depending on the type of variable. If the variable is numeric then users will have the option to view a box plot or a histogram. If the variable is not numeric, then the chart type will be bar chart. 
+Users can provide 3 inputs: variable selector, chart type, and an option to facet by Diagnosis. Once a variable is selected, the options provided for chart type will dynamically change depending on the type of variable. If the variable is numeric then users will have the option to view a box plot or a histogram. If the variable is not numeric, then the chart type will be bar chart. Users also have a checkbox option to facet by Diagnosis which breaks down charts and summaries by diagnosis status. This option is selected by default. 
+
+## Outputs
+The main plot is a reactive chart rendered with ggplot2 and styled with a modern, dark theme. Dynamic text provides a description of the selected variable. A table with summary statistics shows mean, median, standard deviation, minimum, maximum, and count, split by Diagnosis if facet option is selected. Next there is an interactive data table that summarizes counts by the selected variable, with each column having the ability to sort and filter. Above the data table is a download button to allow users to download the data table in csv format. 
 
 # 5. Define Server Logic
 
@@ -30,7 +34,7 @@ The server handles everything behind the scenes that makes the app interactive. 
 
 This app helps users explore the Alzheimer’s data set in a simple, visual way. They can compare variables like age, gender, diet quality, etc. and see how those might relate to diagnosis or cognitive scores. By applying filters and changing the inputs, users can break the data down into different groups and spot trends without needing to do manual calculations. It's a helpful tool for getting quick insights from a pretty big data set.
 
-# 7. Link to GitHub repository containing complete R code for your Shiny app
+# 7. Link to GitHub 
 
 Here’s the GitHub repo with all the files and code used to build the app:  
 [https://github.com/ashley-hutchings/Shiny-App-R-HW](https://github.com/ashley-hutchings/Shiny-App-R-HW)

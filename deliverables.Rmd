@@ -5,6 +5,13 @@ date: "2025-04-19"
 output: pdf_document
 ---
 
+# 1. Concept and Purpose
+The goal of the Alzheimer's Data Explorer is an interactive Shiny application designed to help users explore patterns and potential risk factors related to Alzheimer's Disease. Its purpose is to make complex health data more accessible, especially for users without programming experience. By providing a visual, no-code interface, the app empowers users to investigate relationships between variables and Alzheimer's diagnosis using dynamic charts, summary statistics, and customizable data tables.  
+
+# 2. Initial Plan and Motivation
+The motivation behind this app was to create a simple platform for visualizing the Alzheimer's dataset in a way that was intuitive and accessible for individuals without coding experience. 
+
+
 # 5. Define Server Logic
 
 The server handles everything behind the scenes that makes the app interactive. It reacts to user input and updates the visuals or tables in real time. We used reactive() to manage filtered data and make sure it changes automatically based on selections. Outputs like plots and tables are displayed using renderPlot() and renderTable(), so anytime the user adjusts a variable or filter, the app shows the updated results right away.

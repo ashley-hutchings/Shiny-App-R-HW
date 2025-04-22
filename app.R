@@ -11,6 +11,7 @@ alz$Gender <- factor(alz$Gender, levels = c(0, 1), labels = c("0: Male", "1: Fem
 alz$PatientID <- factor(alz$PatientID)
 alz$Ethnicity <- factor(alz$Ethnicity, levels = c(0, 1,2,3), labels = c("0: Caucasian", "1: African American", "2: Asian", "3: Other"))
 alz$EducationLevel <- factor(alz$EducationLevel, levels = c(0, 1,2,3), labels = c("0: None", "1: High School", "2: Bachelors", "3: Higher"))
+alz$Diagnosis <- factor(alz$Diagnosis, levels = c(0, 1), labels = c("0: No", "1: Yes"))
 
 
 # Define UI
@@ -121,6 +122,8 @@ ui <- fluidPage(
           br(),
           textOutput("varDescription"),
           br(),
+          tableOutput("summaryStats"),
+          br(),
           downloadButton("downloadData", "Download CSV", class = "btn-primary"),
           br(), br(),
           DTOutput("summaryTable")
@@ -139,7 +142,7 @@ server <- function(input, output) {
   descriptions <- list(
     BMI = "Body Mass Index (BMI) is the ratio of height to weight.",
     Age = "Age is recorded in years at the time of data collection.",
-    Gender = "Gender is recorded as Male or Female.",
+    Gender = "Gender is recorded as 0-Male or 1-Female.",
     Diagnosis = "Diagnosis status for Alzheimer's Disease, where 0 indicates No and 1 indicates Yes.",
     EducationLevel = "Years of education completed by the individual.",
     Smoking = "Smoking status, where 0 indicates No and 1 indicates Yes.",
@@ -170,6 +173,37 @@ server <- function(input, output) {
     Forgetfulness= "Presence of forgetfulness, where 0 indicates No and 1 indicates Yes.",
     DoctorInCharge= "This column contains confidential information about the doctor in charge, with XXXConfid as the value for all patients."
   )
+  
+  output$summaryStats <- renderTable({
+    req(input$var)
+    var <- alz[[input$var]]
+    
+    if (is.numeric(var)) {
+      if (input$facet) {
+        alz %>%
+          group_by(Diagnosis) %>%
+          summarize(
+            Mean = round(mean(.data[[input$var]], na.rm = TRUE), 2),
+            Median = round(median(.data[[input$var]], na.rm = TRUE), 2),
+            SD = round(sd(.data[[input$var]], na.rm = TRUE), 2),
+            Min = round(min(.data[[input$var]], na.rm = TRUE), 2),
+            Max = round(max(.data[[input$var]], na.rm = TRUE), 2),
+            .groups = "drop"
+          )
+      } else {
+        tibble(
+          Mean = round(mean(var, na.rm = TRUE), 2),
+          Median = round(median(var, na.rm = TRUE), 2),
+          SD = round(sd(var, na.rm = TRUE), 2),
+          Min = round(min(var, na.rm = TRUE), 2),
+          Max = round(max(var, na.rm = TRUE), 2)
+        )
+      }
+    } else {
+      NULL
+    }
+  })
+  
   
   output$chartTypeUI <- renderUI({
     req(input$var)

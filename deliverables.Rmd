@@ -5,26 +5,19 @@ date: "2025-04-19"
 output: pdf_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+# 5. Define Server Logic
 
-## R Markdown
+The server handles everything behind the scenes that makes the app interactive. It reacts to user input and updates the visuals or tables in real time. We used reactive() to manage filtered data and make sure it changes automatically based on selections. Outputs like plots and tables are displayed using renderPlot() and renderTable(), so anytime the user adjusts a variable or filter, the app shows the updated results right away.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# 6. Examples of insights or analyses that can be obtained through your app
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+This app helps users explore the Alzheimer’s data set in a simple, visual way. They can compare variables like age, gender, diet quality, etc. and see how those might relate to diagnosis or cognitive scores. By applying filters and changing the inputs, users can break the data down into different groups and spot trends without needing to do manual calculations. It's a helpful tool for getting quick insights from a pretty big data set.
 
-```{r cars}
-summary(cars)
-```
+# 7. Link to GitHub repository containing complete R code for your Shiny app
 
-## Including Plots
+Here’s the GitHub repo with all the files and code used to build the app:  
+[https://github.com/ashley-hutchings/Shiny-App-R-HW](https://github.com/ashley-hutchings/Shiny-App-R-HW)
 
-You can also embed plots, for example:
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+``` 

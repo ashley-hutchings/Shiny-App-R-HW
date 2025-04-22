@@ -6,11 +6,21 @@ output: pdf_document
 ---
 
 # 1. Concept and Purpose
+
 The goal of the Alzheimer's Data Explorer is an interactive Shiny application designed to help users explore patterns and potential risk factors related to Alzheimer's Disease. Its purpose is to make complex health data more accessible, especially for users without programming experience. By providing a visual, no-code interface, the app empowers users to investigate relationships between variables and Alzheimer's diagnosis using dynamic charts, summary statistics, and customizable data tables.  
 
 # 2. Initial Plan and Motivation
-The motivation behind this app was to create a simple platform for visualizing the Alzheimer's dataset in a way that was intuitive and accessible for individuals without coding experience. 
 
+The motivation behind this app was to create a simple platform for visualizing the Alzheimer's dataset in a way that was intuitive and accessible for individuals without coding experience. The focus on Alzheimer’s disease seeks to shed light on the complexities of diagnosing it based on multiple contributing factors. See final page for design sketch. 
+
+# 3. Dataset and Relevance to the Course
+
+The dataset used is a publicly available Alzheimer’s Disease dataset from Kaggle. It contains 35 variables related to demographics, cognitive test scores, physical health measures, and behavioral symptoms. 
+The dataset provides real-world data with which to practice and apply techniques learned in this class such as data wrangling, visualizations and data summaries. The data contains both categorical and continuous variables, leveraging conditional logic. 
+
+# 4. Key Features and User Interaction
+## Inputs
+Users can provide 3 inputs: variable selector, chart type, and an option to facet by Diagnosis. Once a variable is selected, the options provided for chart type will dynamically change depending on the type of variable. If the variable is numeric then users will have the option to view a box plot or a histogram. If the variable is not numeric, then the chart type will be bar chart. 
 
 # 5. Define Server Logic
 

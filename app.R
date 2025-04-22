@@ -99,6 +99,9 @@ ui <- fluidPage(
       .shiny-input-container {
         margin-bottom: 20px;
       }
+      .dataTables_paginate .paginate_button {
+        margin: 0 6px !important;
+      }
     "))
   ),
   
@@ -121,9 +124,9 @@ ui <- fluidPage(
   
   sidebarLayout(
     sidebarPanel(
-      selectInput("var", "Choose a variable:", choices = names(alz)),
+      selectInput("var", "Choose a variable:", choices = names(alz), selected="Gender"),
       uiOutput("chartTypeUI"),
-      checkboxInput("facet", "Facet by Diagnosis", value = FALSE),
+      checkboxInput("facet", "Facet by Diagnosis", value = TRUE),
       width = 3
     ),
     
@@ -271,7 +274,9 @@ server <- function(input, output) {
         base_theme
       
       if (input$facet) {
-        p <- p + facet_wrap(~ Diagnosis, labeller = labeller(Diagnosis = c("0: No" = "Diagnosis: No", "1: Yes" = "Diagnosis: Yes")))
+        p <- p +
+          facet_wrap(~ Diagnosis, labeller = labeller(Diagnosis = c("0: No" = "Diagnosis: No", "1: Yes" = "Diagnosis: Yes"))) +
+          scale_fill_manual(values = c("0: No" = "#00ffd0", "1: Yes" = "#e91e63"))
       }
       p
       

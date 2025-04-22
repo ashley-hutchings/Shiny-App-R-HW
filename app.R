@@ -12,7 +12,20 @@ alz$PatientID <- factor(alz$PatientID)
 alz$Ethnicity <- factor(alz$Ethnicity, levels = c(0, 1,2,3), labels = c("0: Caucasian", "1: African American", "2: Asian", "3: Other"))
 alz$EducationLevel <- factor(alz$EducationLevel, levels = c(0, 1,2,3), labels = c("0: None", "1: High School", "2: Bachelors", "3: Higher"))
 alz$Diagnosis <- factor(alz$Diagnosis, levels = c(0, 1), labels = c("0: No", "1: Yes"))
-
+alz$Smoking <- factor(alz$Smoking)
+alz$FamilyHistoryAlzheimers <- factor(alz$FamilyHistoryAlzheimers)
+alz$CardiovascularDisease <- factor(alz$CardiovascularDisease)
+alz$Diabetes <- factor(alz$Diabetes)
+alz$Depression <- factor(alz$Depression)
+alz$HeadInjury <- factor(alz$HeadInjury)
+alz$Hypertension <- factor(alz$Hypertension)
+alz$MemoryComplaints <- factor(alz$MemoryComplaints)
+alz$BehavioralProblems <- factor(alz$BehavioralProblems)
+alz$Confusion <- factor(alz$Confusion)
+alz$Disorientation <- factor(alz$Disorientation)
+alz$PersonalityChanges <- factor(alz$PersonalityChanges)
+alz$DifficultyCompletingTasks <- factor(alz$DifficultyCompletingTasks)
+alz$Forgetfulness <- factor(alz$Forgetfulness)
 
 # Define UI
 ui <- fluidPage(
@@ -123,9 +136,9 @@ ui <- fluidPage(
           textOutput("varDescription"),
           br(),
           tableOutput("summaryStats"),
-          br(),
-          downloadButton("downloadData", "Download CSV", class = "btn-primary"),
           br(), br(),
+          downloadButton("downloadData", "Download Table CSV", class = "btn-primary"),
+          br(), 
           DTOutput("summaryTable")
       ),
       width = 9
@@ -134,7 +147,7 @@ ui <- fluidPage(
 )
 
 # Safe fallback for missing descriptions
-`%||%` <- function(a, b) if (!is.null(a)) a else b
+#`%||%` <- function(a, b) if (!is.null(a)) a else b
 
 # Define server logic
 server <- function(input, output) {
@@ -188,6 +201,7 @@ server <- function(input, output) {
             SD = round(sd(.data[[input$var]], na.rm = TRUE), 2),
             Min = round(min(.data[[input$var]], na.rm = TRUE), 2),
             Max = round(max(.data[[input$var]], na.rm = TRUE), 2),
+            Count = sum(!is.na(.data[[input$var]])),
             .groups = "drop"
           )
       } else {
@@ -196,7 +210,8 @@ server <- function(input, output) {
           Median = round(median(var, na.rm = TRUE), 2),
           SD = round(sd(var, na.rm = TRUE), 2),
           Min = round(min(var, na.rm = TRUE), 2),
-          Max = round(max(var, na.rm = TRUE), 2)
+          Max = round(max(var, na.rm = TRUE), 2),
+          Count = sum(!is.na(var))
         )
       }
     } else {
@@ -222,31 +237,63 @@ server <- function(input, output) {
     req(input$var, input$chart)
     var <- alz[[input$var]]
     
+    base_theme <- theme_minimal(base_size = 14) +
+      theme(
+        #strip.text = element_text(color = "white"),
+        plot.title = element_text(size = 16, face = "bold"),
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12)
+      )
+    
     if (input$chart == "Histogram") {
       p <- ggplot(alz, aes_string(x = input$var)) +
         geom_histogram(fill = "#00ffd0", bins = 30, alpha = 0.85, color = "#121212") +
-        labs(title = paste("Histogram of", input$var), x = input$var, y = "Count")
-      if (input$facet) p <- p + facet_wrap(~ Diagnosis)
+        labs(
+          title = paste("Histogram of", input$var, if (input$facet) "by Diagnosis" else ""),
+          x = input$var,
+          y = "Count"
+        ) +
+        base_theme
+      
+      if (input$facet) {
+        p <- p + facet_wrap(~ Diagnosis, labeller = labeller(Diagnosis = c("0: No" = "Diagnosis: No", "1: Yes" = "Diagnosis: Yes")))
+      }
       p
       
     } else if (input$chart == "Bar Chart") {
       p <- ggplot(alz, aes_string(x = input$var)) +
         geom_bar(fill = "#00ffd0", alpha = 0.85) +
-        labs(title = paste("Bar Chart of", input$var), x = input$var, y = "Count")
-      if (input$facet) p <- p + facet_wrap(~ Diagnosis)
+        labs(
+          title = paste("Bar Chart of", input$var, if (input$facet) "by Diagnosis" else ""),
+          x = input$var,
+          y = "Count"
+        ) +
+        base_theme
+      
+      if (input$facet) {
+        p <- p + facet_wrap(~ Diagnosis, labeller = labeller(Diagnosis = c("0: No" = "Diagnosis: No", "1: Yes" = "Diagnosis: Yes")))
+      }
       p
       
     } else if (input$chart == "Box Plot") {
-      p <- ggplot(alz, aes_string(x = if (input$facet) "factor(Diagnosis)" else NULL, y = input$var)) +
-        geom_boxplot(fill = "#e91e63", alpha = 0.7, color = "#121212") +
+      p <- ggplot(alz, aes_string(
+        x = if (input$facet) "Diagnosis" else "\"\"",
+        y = input$var,
+        fill = if (input$facet) "Diagnosis" else NULL
+      )) +
+        geom_boxplot(alpha = 0.7, color = "#121212") +
         labs(
-          title = paste("Box Plot of", input$var),
+          title = paste("Box Plot of", input$var, if (input$facet) "by Diagnosis" else ""),
           x = if (input$facet) "Diagnosis" else "",
           y = input$var
-        )
+        ) +
+        scale_fill_manual(values = c("0: No" = "#00ffd0", "1: Yes" = "#e91e63")) +
+        base_theme
       p
     }
   })
+  
+  
   
   output$varDescription <- renderText({
     req(input$var)

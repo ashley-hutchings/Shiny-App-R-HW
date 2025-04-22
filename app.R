@@ -7,7 +7,11 @@ library(bslib)
 alz <- read.csv("alzheimers_disease_data.csv")
 
 # Recode variables
-alz$Gender <- factor(alz$Gender, levels = c(0, 1), labels = c("Male", "Female"))
+alz$Gender <- factor(alz$Gender, levels = c(0, 1), labels = c("0: Male", "1: Female"))
+alz$PatientID <- factor(alz$PatientID)
+alz$Ethnicity <- factor(alz$Ethnicity, levels = c(0, 1,2,3), labels = c("0: Caucasian", "1: African American", "2: Asian", "3: Other"))
+alz$EducationLevel <- factor(alz$EducationLevel, levels = c(0, 1,2,3), labels = c("0: None", "1: High School", "2: Bachelors", "3: Higher"))
+
 
 # Define UI
 ui <- fluidPage(
@@ -133,16 +137,38 @@ ui <- fluidPage(
 server <- function(input, output) {
   # Descriptions for variables
   descriptions <- list(
-    BMI = "Body Mass Index is the ratio of height to weight. It is a measure of fitness, but can sometimes be inaccurate for individuals who have high muscle mass.",
+    BMI = "Body Mass Index (BMI) is the ratio of height to weight.",
     Age = "Age is recorded in years at the time of data collection.",
     Gender = "Gender is recorded as Male or Female.",
-    Diagnosis = "Diagnosis indicates the cognitive status of the individual: Cognitively Normal, Mild Cognitive Impairment, or Alzheimer's Disease.",
-    Education = "Years of education completed by the individual.",
-    SES = "Socioeconomic Status (SES) ranges from 1 (low) to 5 (high), representing social and economic standing.",
-    MMSE = "Mini-Mental State Examination (MMSE) is a common measure of cognitive function, scored from 0 to 30.",
-    eTIV = "Estimated Total Intracranial Volume (eTIV) is a measure of brain volume from MRI scans.",
-    nWBV = "Normalized Whole Brain Volume (nWBV) is a measure of total brain size adjusted for head size.",
-    ASF = "Atlas Scaling Factor (ASF) is used in MRI preprocessing to normalize head sizes across individuals."
+    Diagnosis = "Diagnosis status for Alzheimer's Disease, where 0 indicates No and 1 indicates Yes.",
+    EducationLevel = "Years of education completed by the individual.",
+    Smoking = "Smoking status, where 0 indicates No and 1 indicates Yes.",
+    MMSE = "Mini-Mental State Examination (MMSE) score. MMSE is a common measure of cognitive function, scored from 0 to 30, where lower scores indicate cognitive impairment.",
+    AlcoholConsumption = "Weekly alcohol consumption in units.",
+    SleepQuality = "Sleep Quality Score ranging from 4 to 10.",
+    DietQuality = "Diet Quality Score ranging from 0 to 10.",
+    FamilyHistoryAlzheimers = "Family history of Alzheimer's Disease, where 0 indicates No and 1 indicates Yes.",
+    CardiovascularDisease = "Presence of cardiovascular disease, where 0 indicates No and 1 indicates Yes.",
+    Diabetes = "Presence of diabetes, where 0 indicates No and 1 indicates Yes.",
+    Depression = "Presence of depression, where 0 indicates No and 1 indicates Yes.",
+    HeadInjury = "History of head injury, where 0 indicates No and 1 indicates Yes.",
+    Hypertension = "Presence of hypertension aka high blood pressure, where 0 indicates No and 1 indicates Yes.",
+    SystolicBP= "Systolic blood pressure, ranging from 90 to 180 mmHg.",
+    DiastolicBP= "Diastolic blood pressure, ranging from 60 to 120 mmHg.",
+    CholesterolTotal= "Total cholesterol levels, ranging from 150 to 300 mg/dL. Generally, under 200 mg/dL is healthy.",
+    CholesterolLDL= "Low-density lipoprotein cholesterol levels, ranging from 50 to 200 mg/dL. Lower LDL is healthier.",
+    CholesterolHDL= "High-density lipoprotein cholesterol levels, ranging from 20 to 100 mg/dL. 60 mg/dL or higher is considered healthy.",
+    CholesterolTriglycerides= "Triglycerides levels, ranging from 50 to 400 mg/dL.Generally, under 150 mg/dL is healthy.",
+    FunctionalAssessment= "Functional assessment score, ranging from 0 to 10. Lower scores indicate greater impairment.",
+    MemoryComplaints= "Presence of memory complaints, where 0 indicates No and 1 indicates Yes.",
+    BehavioralProblems= "Presence of behavioral problems, where 0 indicates No and 1 indicates Yes.",
+    ADL= "Activities of Daily Living score, ranging from 0 to 10. Lower scores indicate greater impairment.",
+    Confusion= "Presence of confusion, where 0 indicates No and 1 indicates Yes.",
+    Disorientation= "Presence of disorientation, where 0 indicates No and 1 indicates Yes.",
+    PersonalityChanges= "Presence of personality changes, where 0 indicates No and 1 indicates Yes.",
+    DifficultyCompletingTasks= "Presence of difficulty completing tasks, where 0 indicates No and 1 indicates Yes.",
+    Forgetfulness= "Presence of forgetfulness, where 0 indicates No and 1 indicates Yes.",
+    DoctorInCharge= "This column contains confidential information about the doctor in charge, with XXXConfid as the value for all patients."
   )
   
   output$chartTypeUI <- renderUI({

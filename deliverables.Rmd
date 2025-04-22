@@ -24,7 +24,7 @@ Users can provide 3 inputs: variable selector, chart type, and an option to face
 
 # 5. Define Server Logic
 
-The server handles everything behind the scenes that makes the app interactive. It reacts to user input and updates the visuals or tables in real time. We used reactive() to manage filtered data and make sure it changes automatically based on selections. Outputs like plots and tables are displayed using renderPlot() and renderTable(), so anytime the user adjusts a variable or filter, the app shows the updated results right away.
+The server handles everything behind the scenes that makes the app interactive. It reacts to user input and updates the visuals or tables in real time. We used reactive() to manage filtered data and make sure it changes automatically based on selections. Outputs like plots and tables are displayed using renderPlot() and renderTable(), so anytime the user adjusts a variable or filter, the app shows the updated results right away. For example, when users select different values for age or gender, the corresponding bar charts or histograms update instantly to reflect trends within that group. This setup helps users explore how different factors might relate to Alzheimer’s outcomes in a simple and interactive way.
 
 # 6. Examples of insights or analyses that can be obtained through your app
 

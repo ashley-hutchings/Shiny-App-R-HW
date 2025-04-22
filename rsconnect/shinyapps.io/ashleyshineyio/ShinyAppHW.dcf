@@ -5,7 +5,7 @@ account: ashleyshineyio
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 14508524
-bundleId: 10140289
+bundleId: 10154669
 url: https://ashleyshineyio.shinyapps.io/ShinyAppHW/
 version: 1
 asMultiple: FALSE

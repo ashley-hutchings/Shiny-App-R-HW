@@ -257,8 +257,8 @@ server <- function(input, output) {
       )
     
     if (input$chart == "Histogram") {
-      p <- ggplot(alz, aes_string(x = input$var)) +
-        geom_histogram(fill = "#00ffd0", bins = 30, alpha = 0.85, color = "#121212") +
+      p <- ggplot(alz, aes_string(x = input$var, fill = if (input$facet) "Diagnosis" else NULL)) +
+        geom_histogram(bins = 30, alpha = 0.85, color = "#121212") +
         labs(
           title = paste("Histogram of", input$var, if (input$facet) "by Diagnosis" else ""),
           x = input$var,
@@ -274,8 +274,8 @@ server <- function(input, output) {
       p
       
     } else if (input$chart == "Bar Chart") {
-      p <- ggplot(alz, aes_string(x = input$var)) +
-        geom_bar(fill = "#00ffd0", alpha = 0.85) +
+      p <- ggplot(alz, aes_string(x = input$var, fill = if (input$facet) "Diagnosis" else NULL)) +
+        geom_bar( alpha = 0.85, color = "#121212") +
         labs(
           title = paste("Bar Chart of", input$var, if (input$facet) "by Diagnosis" else ""),
           x = input$var,

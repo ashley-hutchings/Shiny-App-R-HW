@@ -257,57 +257,70 @@ server <- function(input, output) {
       )
     
     if (input$chart == "Histogram") {
-      p <- ggplot(alz, aes_string(x = input$var, fill = if (input$facet) "Diagnosis" else NULL)) +
-        geom_histogram(bins = 30, alpha = 0.85, color = "#121212") +
-        labs(
-          title = paste("Histogram of", input$var, if (input$facet) "by Diagnosis" else ""),
-          x = input$var,
-          y = "Count"
-        ) +
-        base_theme
-      
       if (input$facet) {
-        p <- p + facet_wrap(~ Diagnosis, labeller = labeller(Diagnosis = c("0: No" = "Diagnosis: No", "1: Yes" = "Diagnosis: Yes")))+
-          scale_fill_manual(values = c("0: No" = "#00ffd0", "1: Yes" = "#e91e63"))
-        ######### This should make each value of Diagnosis a different color, right?? But not working :(
+        p <- ggplot(alz, aes_string(x = input$var, fill = "Diagnosis")) +
+          geom_histogram(bins = 30, alpha = 0.85, color = "#121212", position = "identity") +
+          scale_fill_manual(values = c("0: No" = "#00ffd0", "1: Yes" = "#e91e63")) +
+          facet_wrap(~ Diagnosis, labeller = labeller(Diagnosis = c("0: No" = "Diagnosis: No", "1: Yes" = "Diagnosis: Yes")))
+      } else {
+        p <- ggplot(alz, aes_string(x = input$var)) +
+          geom_histogram(fill = "#00ffd0", bins = 30, alpha = 0.85, color = "#121212")
       }
+      
+      p <- p + labs(
+        title = paste("Histogram of", input$var, if (input$facet) "by Diagnosis" else ""),
+        x = input$var,
+        y = "Count"
+      ) + base_theme
+      
       p
       
     } else if (input$chart == "Bar Chart") {
-      p <- ggplot(alz, aes_string(x = input$var, fill = if (input$facet) "Diagnosis" else NULL)) +
-        geom_bar( alpha = 0.85, color = "#121212") +
-        labs(
-          title = paste("Bar Chart of", input$var, if (input$facet) "by Diagnosis" else ""),
-          x = input$var,
-          y = "Count"
-        ) +
-        base_theme
-      
       if (input$facet) {
-        p <- p +
-          facet_wrap(~ Diagnosis, labeller = labeller(Diagnosis = c("0: No" = "Diagnosis: No", "1: Yes" = "Diagnosis: Yes"))) +
-          scale_fill_manual(values = c("0: No" = "#00ffd0", "1: Yes" = "#e91e63"))
-        ######### This should make each value of Diagnosis a different color, right?? But not working :(
+        p <- ggplot(alz, aes_string(x = input$var, fill = "Diagnosis")) +
+          geom_bar(alpha = 0.85, color = "#121212", position = "dodge") +
+          scale_fill_manual(values = c("0: No" = "#00ffd0", "1: Yes" = "#e91e63")) +
+          facet_wrap(~ Diagnosis, labeller = labeller(Diagnosis = c("0: No" = "Diagnosis: No", "1: Yes" = "Diagnosis: Yes")))
+      } else {
+        p <- ggplot(alz, aes_string(x = input$var)) +
+          geom_bar(fill = "#00ffd0", alpha = 0.85, color = "#121212")
       }
+      
+      p <- p + labs(
+        title = paste("Bar Chart of", input$var, if (input$facet) "by Diagnosis" else ""),
+        x = input$var,
+        y = "Count"
+      ) + base_theme
+      
       p
       
     } else if (input$chart == "Box Plot") {
-      p <- ggplot(alz, aes_string(
-        x = if (input$facet) "Diagnosis" else "\"\"",
-        y = input$var,
-        fill = if (input$facet) "Diagnosis" else NULL
-      )) +
-        geom_boxplot(alpha = 0.7, color = "#121212") +
-        labs(
-          title = paste("Box Plot of", input$var, if (input$facet) "by Diagnosis" else ""),
-          x = if (input$facet) "Diagnosis" else "",
+      if (input$facet) {
+        p <- ggplot(alz, aes_string(
+          x = "Diagnosis",
+          y = input$var,
+          fill = "Diagnosis"
+        )) +
+          geom_boxplot(alpha = 0.7, color = "#121212") +
+          scale_fill_manual(values = c("0: No" = "#00ffd0", "1: Yes" = "#e91e63"))
+      } else {
+        p <- ggplot(alz, aes_string(
+          x = "\"\"",
           y = input$var
-        ) +
-        scale_fill_manual(values = c("0: No" = "#00ffd0", "1: Yes" = "#e91e63")) + #### This one IS working!!! But idk why the others aren't...
-        base_theme
+        )) +
+          geom_boxplot(fill = "#00ffd0", alpha = 0.7, color = "#121212")
+      }
+      
+      p <- p + labs(
+        title = paste("Box Plot of", input$var, if (input$facet) "by Diagnosis" else ""),
+        x = if (input$facet) "Diagnosis" else "",
+        y = input$var
+      ) + base_theme
+      
       p
     }
   })
+  
   
   
  # Defines the default variable description if I have not explicitly defined it above. 

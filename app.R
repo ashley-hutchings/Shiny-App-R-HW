@@ -1,3 +1,4 @@
+# Load libraries
 library(shiny)
 library(tidyverse)
 library(DT)
@@ -6,7 +7,7 @@ library(bslib)
 # Load dataset
 alz <- read.csv("alzheimers_disease_data.csv")
 
-# Recode variables
+# Recode variables to factor as needed
 alz$Gender <- factor(alz$Gender, levels = c(0, 1), labels = c("0: Male", "1: Female"))
 alz$PatientID <- factor(alz$PatientID)
 alz$Ethnicity <- factor(alz$Ethnicity, levels = c(0, 1,2,3), labels = c("0: Caucasian", "1: African American", "2: Asian", "3: Other"))
@@ -27,7 +28,7 @@ alz$PersonalityChanges <- factor(alz$PersonalityChanges)
 alz$DifficultyCompletingTasks <- factor(alz$DifficultyCompletingTasks)
 alz$Forgetfulness <- factor(alz$Forgetfulness)
 
-# Define UI
+# Define UI colors, margins, dimensions, and theme
 ui <- fluidPage(
   theme = bs_theme(bootswatch = "darkly"),
   tags$head(
@@ -104,24 +105,28 @@ ui <- fluidPage(
       }
     "))
   ),
-  
+
+  # Title of App  
   titlePanel("Alzheimer's Diagnosis Explorer"),
-  
+
+  # Subtitle section 
   fluidRow(
     column(
       width = 12,
       wellPanel(
         HTML("<h4>About Alzheimer's Disease</h4>
-          <p>Alzheimer’s disease is a progressive neurological disorder that causes memory loss, cognitive decline, and personality changes. 
-          It is the most common form of dementia, affecting millions of individuals and their families worldwide. Though research continues, there is currently no cure for Alzheimer's.</p>
+          <p>Alzheimer’s Disease is a progressive neurological disorder that leads to memory loss, cognitive decline, and changes in behavior or personality.
+It is the most common form of dementia, impacting millions of individuals and their families around the world.
+While research is ongoing, there is currently no known cure — making early detection and understanding of contributing factors more important than ever.</p>
           <h5>How to Use This App</h5>
-          <p>Select a variable from the dropdown menu to explore how it relates to Alzheimer's diagnoses. 
-          Choose a chart type based on the data, and optionally facet the results by diagnosis category. 
-          You can also download a summary table of the data below the chart. Click <a href='https://www.kaggle.com/datasets/rabieelkharoua/alzheimers-disease-dataset' target='_blank'>here</a> to download the full dataset. </p>")
+          <p>Select a variable from the dropdown menu to explore its relationship to Alzheimer's diagnoses. Chart options will update automatically based on the data type, allowing you to choose the most appropriate visualization. 
+             For deeper insight, you can optionally break down results by diagnosis category using the faceting option (default). 
+             Below the chart, you’ll find a downloadable summary table for further analysis. Click <a href='https://www.kaggle.com/datasets/rabieelkharoua/alzheimers-disease-dataset' target='_blank'>here</a> to download the full dataset. </p>")
       )
     )
   ),
   
+  # Sidebar/filters layout
   sidebarLayout(
     sidebarPanel(
       selectInput("var", "Choose a variable:", choices = names(alz), selected="Gender"),
@@ -129,7 +134,8 @@ ui <- fluidPage(
       checkboxInput("facet", "Facet by Diagnosis", value = TRUE),
       width = 3
     ),
-    
+ 
+    # Layout/order of main panel   
     mainPanel(
       div(class = "main-panel",
           div(class = "shiny-plot-output",
@@ -149,13 +155,14 @@ ui <- fluidPage(
   )
 )
 
-# Safe fallback for missing descriptions
-#`%||%` <- function(a, b) if (!is.null(a)) a else b
+# Fallback for missing descriptions
+`%||%` <- function(a, b) if (!is.null(a)) a else b
 
-# Define server logic
+# Defined server logic
 server <- function(input, output) {
-  # Descriptions for variables
+  # Descriptions for variables, most are taken directly from the Kaggle website
   descriptions <- list(
+    PatientID = "Unique ID for patient.",
     BMI = "Body Mass Index (BMI) is the ratio of height to weight.",
     Age = "Age is recorded in years at the time of data collection.",
     Gender = "Gender is recorded as 0-Male or 1-Female.",
@@ -190,6 +197,7 @@ server <- function(input, output) {
     DoctorInCharge= "This column contains confidential information about the doctor in charge, with XXXConfid as the value for all patients."
   )
   
+  # Defining conditional summary stats table to only show when variable is numeric
   output$summaryStats <- renderTable({
     req(input$var)
     var <- alz[[input$var]]
@@ -222,7 +230,7 @@ server <- function(input, output) {
     }
   })
   
-  
+# Defines which chart options should be available given the variable type  
   output$chartTypeUI <- renderUI({
     req(input$var)
     var <- alz[[input$var]]
@@ -236,13 +244,13 @@ server <- function(input, output) {
     }
   })
   
+# Renders the charts given the input criteria and conditions  
   output$mainPlot <- renderPlot({
     req(input$var, input$chart)
     var <- alz[[input$var]]
     
     base_theme <- theme_minimal(base_size = 14) +
       theme(
-        #strip.text = element_text(color = "white"),
         plot.title = element_text(size = 16, face = "bold"),
         axis.title = element_text(size = 14),
         axis.text = element_text(size = 12)
@@ -259,7 +267,9 @@ server <- function(input, output) {
         base_theme
       
       if (input$facet) {
-        p <- p + facet_wrap(~ Diagnosis, labeller = labeller(Diagnosis = c("0: No" = "Diagnosis: No", "1: Yes" = "Diagnosis: Yes")))
+        p <- p + facet_wrap(~ Diagnosis, labeller = labeller(Diagnosis = c("0: No" = "Diagnosis: No", "1: Yes" = "Diagnosis: Yes")))+
+          scale_fill_manual(values = c("0: No" = "#00ffd0", "1: Yes" = "#e91e63"))
+        ######### This should make each value of Diagnosis a different color, right?? But not working :(
       }
       p
       
@@ -277,6 +287,7 @@ server <- function(input, output) {
         p <- p +
           facet_wrap(~ Diagnosis, labeller = labeller(Diagnosis = c("0: No" = "Diagnosis: No", "1: Yes" = "Diagnosis: Yes"))) +
           scale_fill_manual(values = c("0: No" = "#00ffd0", "1: Yes" = "#e91e63"))
+        ######### This should make each value of Diagnosis a different color, right?? But not working :(
       }
       p
       
@@ -292,19 +303,20 @@ server <- function(input, output) {
           x = if (input$facet) "Diagnosis" else "",
           y = input$var
         ) +
-        scale_fill_manual(values = c("0: No" = "#00ffd0", "1: Yes" = "#e91e63")) +
+        scale_fill_manual(values = c("0: No" = "#00ffd0", "1: Yes" = "#e91e63")) + #### This one IS working!!! But idk why the others aren't...
         base_theme
       p
     }
   })
   
   
-  
+ # Defines the default variable description if I have not explicitly defined it above. 
   output$varDescription <- renderText({
     req(input$var)
     descriptions[[input$var]] %||% "No description available for this variable."
   })
   
+  # Renders summary data table with filters for each column
   output$summaryTable <- renderDT({
     if (input$facet) {
       summary_data <- alz %>%
@@ -333,6 +345,7 @@ server <- function(input, output) {
     )
   })
   
+  # Renders the Download CSV button to download the summary data table
   output$downloadData <- downloadHandler(
     filename = function() {
       paste("alzheimers_summary_", Sys.Date(), ".csv", sep = "")

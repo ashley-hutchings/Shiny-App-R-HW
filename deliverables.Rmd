@@ -30,7 +30,7 @@ The main plot is a reactive chart rendered with ggplot2 and styled with a modern
 
 The server handles everything behind the scenes that makes the app interactive. It reacts to user input and updates the visuals or tables in real time. We used reactive() to manage filtered data and made sure it changed automatically based on selections. Outputs like plots and tables are displayed using renderPlot() and renderTable(), so anytime the user adjusts a variable or filter, the app shows the updated results dynamically. For example, when users select different values for age or gender, the corresponding bar charts or histograms update instantly to reflect trends within that group. 
 
-# 6. Examples of insights
+# 6. Examples of Insights
 
 This app helps users explore the Alzheimer’s data set in a simple, visual way. They can compare variables like age, gender, diet quality, etc. and see how those might relate to diagnosis or cognitive scores.  For example, we saw that older age groups tended to have a higher proportion of Alzheimer’s diagnoses, and that people with lower diet quality scores often had lower cognitive function scores. Users can also observe how education level might play a role in cognitive outcomes, or how diagnosis rates vary between males and females. By applying filters and changing the inputs, users can break the data down into different groups and spot trends without needing to do manual calculations. It's a helpful tool for getting quick insights from a pretty big data set. Even just exploring a few variables can uncover interesting relationships that would be easy to miss in raw data alone.
 
